@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+{% include 'partials/_menu.html' %}
+
+	<main>
+		<section>
+			<h1 href="lista-produtos.html" class="titulos">{{ categoria.nome }}</h1>
+			<form action="{% url 'listagem_podutos_por_categoria' categoria.id %}" class="for-busca">
+				<input type="text" name="busca" placeholder="O que esta Procurando ?" class="campo-busca" required>
+				<input type="submit" class="btn btn-light" value="Buscar" style="margin: 1rem;">
+			</form>
+		</section>
+		<section>
+			<div class="caixa">
+			{% if produtos %}
+			<ul class="produtos">
+				{% for produto in produtos %}
+				<li>
+					<a href="{% url 'produto' produto.id %}">
+					{% if produto.oferta %}
+					<div class="promocao">
+						<p class="titulo-promocao"> Oferta </p>
+					</div>
+					{% endif %}
+					{% if produto.promocao %}
+					<div class="promocao">
+						<p class="titulo-promocao"> Promoção </p>
+					</div>
+					{% endif %}
+					<h1 class="nome-produto"> {{ produto.nome_produto }}</h1>
+						{% if produto.imagem_produto == '' %}
+						<img src="{% static 'icones/SemImagem.bmp' %}">
+						{% else %}
+							<img src="{{ produto.imagem_produto.url }}">
+						{% endif %}
+						<p class="produto-preco">R$ {{produto.preco}}</p>
+						</a>
+					</li>
+						{% endfor %}
+					</ul>
+			{% else %}
+			<h1 class="titulos">Esta categoria está vazia</h1>
+			{% endif %}
+			</div>
+		</section>
+	</main>
+{% endblock %}
