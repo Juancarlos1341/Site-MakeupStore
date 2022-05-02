@@ -1,4 +1,5 @@
 from unicodedata import name
+from django import urls
 from django.urls import path
 from . import views
 from django.conf import settings
@@ -10,4 +11,5 @@ urlpatterns = [
     path('remover/<int:produto_id>', views.remover_item, name='remover'),
     path('alterar/<str:nome>/<int:id>',views.alterar_item, name='alterar'),
     path('pagina/<str:nome>/<int:id>', views.pagina_alterar, name='pagina_alterar'),
+    #path('deletar/', views.deletar_carrinho, name='apagar_tudo'),
     ]

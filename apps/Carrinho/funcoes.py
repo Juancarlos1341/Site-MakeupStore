@@ -16,7 +16,10 @@ def salvar_pedido(quantidade, produto, id):
         preco_final= str(int(quantidade) * float(produto.preco))
     )
     lista_compra.save()
-    carrinho = Carrinho.objects.get(numero=id)
+    try:
+        carrinho = Carrinho.objects.get(numero=id)
+    except:
+        criar_carrinho(id)
     carrinho.valor_total += Decimal(lista_compra.preco_final)
     carrinho.save()
 

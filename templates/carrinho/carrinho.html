@@ -37,6 +37,7 @@
 			{% for valor_total in preco %}
 			<h2 class="titulos">Total da Compra : R$ {{ valor_total.valor_total }}</h2>
 			{% endfor %}
+			<a class="btn btn-success" href="#">Finalizar Carrinho</a> <a class="btn btn-danger" href="{% url 'apagar_tudo' %}">Cancelar Carrinho</a>
 		{% else %}
 		<h2 class="titulos">Não a produtos em seu carrinho.</h2>
 		{% endif %}

@@ -70,3 +70,7 @@ def pagina_do_carrinho_de_compra(request):
         'preco': carrinho_de_compra
     }
     return render(request, 'carrinho/carrinho.html', dados)
+
+'''def deletar_carrinho(request):
+    deletar_todos_os_itens(request.session.get('id_carrinho'))
+    return redirect("index")'''
