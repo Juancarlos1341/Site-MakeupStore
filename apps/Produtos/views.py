@@ -4,6 +4,10 @@ from .models import *
 def index(request):
     produtos = Produtos.objects.order_by().filter(ativo=True)
     #request.session['id_carrinho'] = None
+    if request.session.get('lista_de_compras') is None:
+        request.session['lista_de_compras'] = []
+
+    print(request.session.get('lista_de_compras'))
     print(request.session.get('id_carrinho'))
     
     verifica_estoque()

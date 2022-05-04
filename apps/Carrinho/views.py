@@ -18,20 +18,19 @@ def adicionar_item(request, id):
         item_igual = verifica_item(produto, id_carrinho)
         if not item_igual:
             quantidade = request.GET['quantidade']
-            produto.estoque = int(produto.estoque) - int(quantidade)
+            diminuir_estoque(quantidade, produto.id)
             salvar_pedido(quantidade, produto, id_carrinho)
-            produto.save()
+            listar_item(request, id_carrinho, produto.nome_produto)
             messages.success(request, f'O { produto.nome_produto } foi adicionado com sucesso')
             return redirect('carrinho')
         else:
             messages.error(request, 'Este produto já tem em seu carrinho, tente alterar !')
             return redirect('carrinho')
 
-def remover_item(request, produto_id):
-    quantidade, nome, valor = revomer(produto_id)
+def remover_item(request, id_item):
+    quantidade, nome, valor = revomer(id_item, request)
     produto = Produtos.objects.get(nome_produto=nome)
-    produto.estoque += int(quantidade)
-    produto.save()
+    aumentar_estoque(quantidade,produto.id)
     carrinho = Carrinho.objects.get(numero=request.session.get('id_carrinho'))
     carrinho.valor_total -= valor
     carrinho.save()
@@ -51,7 +50,7 @@ def alterar_item(request, nome, id):
     if 'quantidade' in request.GET:
         quantidade = request.GET['quantidade']
         id_carrinho = request.session.get('id_carrinho')
-        alterar_produto_no_carrinho(nome, id, id_carrinho, quantidade )
+        alterar_produto_no_carrinho(nome, id, id_carrinho, quantidade, request)
         messages.warning(request, f'o {nome} foi alterado com suscesso no seu carrinho.')
         return redirect('carrinho')
 
@@ -71,6 +70,7 @@ def pagina_do_carrinho_de_compra(request):
     }
     return render(request, 'carrinho/carrinho.html', dados)
 
-'''def deletar_carrinho(request):
-    deletar_todos_os_itens(request.session.get('id_carrinho'))
-    return redirect("index")'''
+def deletar_carrinho(request):
+    deletar_todos_os_itens(request, request.session.get('id_carrinho'))
+    messages.success(request, f'Seu Carrinho foi esvaziado com sucesso')
+    return redirect("carrinho")
