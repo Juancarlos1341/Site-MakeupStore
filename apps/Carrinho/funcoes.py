@@ -1,10 +1,8 @@
-from ast import Try
-from math import prod
-import re
 from .models import *
 from django.shortcuts import get_object_or_404
 from decimal import Decimal
 from Produtos.models import Produtos
+
 
 def salvar_pedido(quantidade, produto, id):
     '''Salva um Pedido no banco de dados'''
@@ -49,6 +47,7 @@ def revomer(id, request):
 
 
 def preco_total():
+    """Soma o preço do carrinho"""
     item = Items.objects.get()
     valor_anterior = 0
     for novo_valor in item:
@@ -68,7 +67,9 @@ def verifica_item(produto, id):
     except :
         return False
 
+
 def alterar_produto_no_carrinho(nome, id, id_carrinho, nova_quantidade, request):
+    '''Aletera o produto selecionado, excluindo o antigo e adicionando um novo.'''
     produto = get_object_or_404(Produtos, nome_produto=nome)
     quantidade, nome, valor = revomer(id, request)
     produto = Produtos.objects.get(nome_produto=nome)
@@ -80,22 +81,26 @@ def alterar_produto_no_carrinho(nome, id, id_carrinho, nova_quantidade, request)
     diminuir_estoque(nova_quantidade, produto.id)
     listar_item(request, id_carrinho, nome)
 
+
 def diminuir_estoque(quantidade, id):
+    '''Diminui o estoque do produto selecionado'''
     produto = Produtos.objects.get(pk=id)
     produto.estoque -= int(quantidade)
     produto.save()
 
+
 def aumentar_estoque(quantidade, id):
+    '''Aumenta o estoque do produto selecionado'''
     produto = Produtos.objects.get(pk=id)
     produto.estoque += int(quantidade)
     produto.save()
 
 
 def deletar_todos_os_itens(request, id_carrinho):
+    '''zera todo o carrinho'''
     lista = request.session['lista_de_compras']
     lista_2 = lista
     for id_item in lista_2:
-        print(id_item)
         quantidade, nome, valor = remover_item(id_item)
         produto = Produtos.objects.get(nome_produto=nome)
         aumentar_estoque(quantidade, produto.id)
@@ -116,10 +121,49 @@ def listar_item(request, id_carrinho, produto):
     lista.append(item.id)
     request.session['lista_de_compras'] = lista
 
+
 def remover_item(id):
+    '''Remove o id do item na sessao de lista'''
     item = get_object_or_404(Items, pk=id)
     quantidade = item.quantidade
     nome = item.produtos
     valor = item.preco_final
     item.delete()
     return quantidade, nome, valor
+
+
+def verifica_id_carrinho(request):
+    '''Verifica se existe o id do carrinho no banco de dados, evitando erros'''
+    id_carrinho = request.session.get('id_carrinho')
+    try:
+        carrinho = Carrinho.objects.get(numero=id_carrinho)
+        request.session['id_carrinho'] = carrinho.numero
+        request.session.modified = True
+    except:
+        carrinho = Carrinho.objects.create(
+            numero = id_carrinho,
+            valor_total = 0.00
+        )
+        carrinho.save()
+    
+
+
+def verifica_lista_de_compras(request):
+    '''Verifica se existe o id do produto no banco de dados, evitando erros'''
+    lista = request.session['lista_de_compras']
+    for id_item in lista:
+        try:
+            Items.objects.get(id=id_item)
+        except:
+            lista.remove(id_item)
+    request.session['lista_de_compras'] = lista
+    request.session.modified = True
+            
+
+def verifica_estoque():
+    '''Verifica se o estoque do produto está zerado e ele inativa por este motivo'''
+    for i in range(1, len(Produtos.objects.order_by())):
+        produto = Produtos.objects.get(pk=i)
+        if produto.estoque == 0:
+            produto.ativo = False
+            produto.save()

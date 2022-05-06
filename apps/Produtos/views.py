@@ -1,11 +1,13 @@
 from django.shortcuts import render, get_list_or_404, get_object_or_404, redirect
 from .models import *
+from Carrinho.funcoes import *
 
 def index(request):
     produtos = Produtos.objects.order_by().filter(ativo=True)
     #request.session['id_carrinho'] = None
     if request.session.get('lista_de_compras') is None:
         request.session['lista_de_compras'] = []
+    verifica_lista_de_compras(request)
 
     print(request.session.get('lista_de_compras'))
     print(request.session.get('id_carrinho'))
@@ -60,11 +62,3 @@ def produtos(request, id):
     }
 
     return render(request, 'produtos/produto.html', dados)
-
-
-def verifica_estoque():
-    for i in range(1, len(Produtos.objects.order_by())):
-        produto = Produtos.objects.get(pk=i)
-        if produto.estoque == 0:
-            produto.ativo = False
-            produto.save()

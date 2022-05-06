@@ -1,4 +1,3 @@
-import re
 from django.shortcuts import render, get_object_or_404, redirect
 from Produtos.models import Produtos
 from django.contrib import messages
@@ -13,6 +12,7 @@ def adicionar_item(request, id):
         carrinho_id = carrinho.numero
         criar_carrinho(carrinho_id)
         request.session['id_carrinho'] = int(carrinho_id) + 1
+    verifica_id_carrinho(request)
     if 'quantidade' in request.GET:
         id_carrinho = request.session.get('id_carrinho')
         item_igual = verifica_item(produto, id_carrinho)
@@ -60,6 +60,8 @@ def pagina_do_carrinho_de_compra(request):
         'carrinho': ''
         }
         return render(request, 'carrinho/carrinho.html', dados)
+    verifica_id_carrinho(request)
+    verifica_lista_de_compras(request)
     id = request.session.get('id_carrinho')
     lista_do_carrinho = Items.objects.order_by().filter(numero_carrinho=id)
     carrinho_de_compra = Carrinho.objects.order_by().filter(numero=id)
