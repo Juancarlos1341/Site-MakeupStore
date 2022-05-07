@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_list_or_404, get_object_or_404, redirect
 from .models import *
 from Carrinho.funcoes import *
+from django.core.paginator import Paginator
 
 def index(request):
     produtos = Produtos.objects.order_by().filter(ativo=True)
@@ -15,6 +16,7 @@ def index(request):
     verifica_estoque()
     dicas_produtos = Dicas_produtos.objects.order_by().filter(publicar_dica=True)
     carrosel = Carrossel.objects.order_by()
+    
     dados = {
         'produtos': produtos,
         'dicas': dicas_produtos,
@@ -23,6 +25,7 @@ def index(request):
     return render(request, 'produtos/index.html', dados)
 
 def lista_produtos_categoria(request, id):
+    
     
     categoria = get_object_or_404(Categoria, pk=id)
     produtos = Produtos.objects.order_by().filter(categoria=id).filter(ativo=True)
@@ -38,8 +41,12 @@ def lista_produtos_categoria(request, id):
 
         return render(request, 'produtos/lista-produtos.html', dados)
     else:
+        numero_produtos = len(produtos) / 2
+        paginator = Paginator(produtos, numero_produtos)
+        page = request.GET.get('page')
+        produtos_por_pagina = paginator.get_page(page)
         dados = {
-            'produtos' : produtos,
+            'produtos' : produtos_por_pagina,
             'categoria': categoria,
         }
 

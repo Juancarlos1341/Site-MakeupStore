@@ -27,12 +27,15 @@ def adicionar_item(request, id):
             messages.error(request, 'Este produto já tem em seu carrinho, tente alterar !')
             return redirect('carrinho')
 
+
 def remover_item(request, id_item):
     quantidade, nome, valor = revomer(id_item, request)
     produto = Produtos.objects.get(nome_produto=nome)
     aumentar_estoque(quantidade,produto.id)
     carrinho = Carrinho.objects.get(numero=request.session.get('id_carrinho'))
     carrinho.valor_total -= valor
+    if carrinho.valor_total <= 0:
+        carrinho.valor_total = 0.00
     carrinho.save()
     messages.error(request, 'Produto foi retirado do seu carrinho com sucesso.')
     return redirect('carrinho')
@@ -46,6 +49,7 @@ def pagina_alterar(request, nome, id):
     }
     return render(request,'produtos/produto-alterar.html', dados)
 
+
 def alterar_item(request, nome, id):
     if 'quantidade' in request.GET:
         quantidade = request.GET['quantidade']
@@ -54,14 +58,15 @@ def alterar_item(request, nome, id):
         messages.warning(request, f'o {nome} foi alterado com suscesso no seu carrinho.')
         return redirect('carrinho')
 
+
 def pagina_do_carrinho_de_compra(request):
     if request.session.get('id_carrinho') is None:
         dados = {
         'carrinho': ''
         }
         return render(request, 'carrinho/carrinho.html', dados)
-    verifica_id_carrinho(request)
     verifica_lista_de_compras(request)
+    verifica_id_carrinho(request)
     id = request.session.get('id_carrinho')
     lista_do_carrinho = Items.objects.order_by().filter(numero_carrinho=id)
     carrinho_de_compra = Carrinho.objects.order_by().filter(numero=id)
@@ -72,7 +77,8 @@ def pagina_do_carrinho_de_compra(request):
     }
     return render(request, 'carrinho/carrinho.html', dados)
 
+
 def deletar_carrinho(request):
     deletar_todos_os_itens(request, request.session.get('id_carrinho'))
     messages.success(request, f'Seu Carrinho foi esvaziado com sucesso')
-    return redirect("carrinho")
+    return redirect("index")

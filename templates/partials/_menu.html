@@ -27,7 +27,7 @@
                             </li>
                             <li>
                                 {% if user.is_superuser %}
-                                <a href="{% url 'index' %}" class="opcao"><img src="{% static 'icones/admin.png' %}" class="icones">Admin</a>
+                                <a href="{% url 'admin:index' %}" class="opcao"><img src="{% static 'icones/admin.png' %}" class="icones">Admin</a>
                                 {% endif %}
                             </li>
                         </ul>
@@ -55,7 +55,7 @@
                     </li>
                     <li>
                         {% if user.is_superuser %}
-                            <a href="{% url 'index' %}" class="opcao"><img src="{% static 'icones/admin.png' %}" class="icones">Admin</a>
+                            <a href="{% url 'admin:index' %}" class="opcao"><img src="{% static 'icones/admin.png' %}" class="icones">Admin</a>
                         {% endif %}
                     </li>
                 </ul>

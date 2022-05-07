@@ -8,7 +8,6 @@ def salvar_pedido(quantidade, produto, id):
     '''Salva um Pedido no banco de dados'''
     lista_compra = Items.objects.create(
         numero_carrinho = id,
-        pertence_pessoa='Juan',
         produtos= produto.nome_produto,
         preco= produto.preco,
         quantidade= quantidade,
@@ -28,7 +27,9 @@ def criar_carrinho(id):
     nova_id = int(id) + 1
     carrinho = Carrinho.objects.create(
         numero = nova_id,
-        valor_total = 0.00
+        valor_total = 0.00,
+        status = "Andamento",
+        pertence_a = "Pessoa",
     )
     carrinho.save()
 
@@ -140,13 +141,8 @@ def verifica_id_carrinho(request):
         request.session['id_carrinho'] = carrinho.numero
         request.session.modified = True
     except:
-        carrinho = Carrinho.objects.create(
-            numero = id_carrinho,
-            valor_total = 0.00
-        )
-        carrinho.save()
+        recriar_carrinho(request)
     
-
 
 def verifica_lista_de_compras(request):
     '''Verifica se existe o id do produto no banco de dados, evitando erros'''
@@ -156,8 +152,9 @@ def verifica_lista_de_compras(request):
             Items.objects.get(id=id_item)
         except:
             lista.remove(id_item)
-    request.session['lista_de_compras'] = lista
-    request.session.modified = True
+            redefinir_valor_carrinho(request)
+            request.session['lista_de_compras'] = lista
+            request.session.modified = True
             
 
 def verifica_estoque():
@@ -167,3 +164,26 @@ def verifica_estoque():
         if produto.estoque == 0:
             produto.ativo = False
             produto.save()
+
+
+def recriar_carrinho(request):
+    id_carrinho = request.session.get('id_carrinho')
+    lista = request.session['lista_de_compras']
+    valor = 0
+    for id_item in lista:
+        produto = Items.objects.get(id=id_item)
+        valor += produto.preco_final
+
+    carrinho = Carrinho.objects.create(
+        numero = id_carrinho,
+        valor_total = valor,
+    )
+    carrinho.save()
+
+def redefinir_valor_carrinho(request):
+    lista = request.session['lista_de_compras']
+    carrinho = Carrinho.objects.get(numero=request.session.get('id_carrinho'))
+    for id_item in lista:
+        produto = Items.objects.get(id=id_item)
+        carrinho.valor_total -= produto.preco_final
+        carrinho.save()
